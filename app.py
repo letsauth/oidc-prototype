@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-from Crypto.PublicKey import RSA
 from flask import Flask, render_template
-from jose import jwk
+from jwkest.jwk import jwk_wrap, RSA
 
 
 # configuration
@@ -29,21 +28,11 @@ def index():
 def main():
     import sys
 
-    # FIXME: Put these somewhere useful / reusable.
+    # FIXME: Put this bit somewhere useful / reusable.
     print("Generating ephemeral keypair...")
     keypair = RSA.generate(2048)
-    seckey = keypair.exportKey()
-    pubkey = keypair.publickey().exportKey()
-
-    print(seckey.decode('utf-8'))
-    print(pubkey.decode('utf-8'))
-
-    # The jose library doesn't yet support serializing RSA keys as JWKs
-    # We'll have to do it ourselves
-    # See https://tools.ietf.org/html/rfc7518#section-6.3
-    # Each key object has an `n` and `e` property that we just need to encode
-    # Just have to base64url encode each value as an unsigned big-endian octect
-    # sequence
+    pubjwk = jwk_wrap(keypair).serialize()
+    print(pubjwk)
 
     ip, port = "127.0.0.1", 5000
     if len(sys.argv) > 1:
